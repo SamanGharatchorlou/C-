@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+//comment
+
 int main()
 {
 	//name, str, hp, block
