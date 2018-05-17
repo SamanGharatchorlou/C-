@@ -4,51 +4,120 @@
 #include <iostream>
 #include <string>
 
+// ------------------- Warrior ---------------------
 Warrior::Warrior()
 {
-	this->name = "";
-	this->strength = 0;
-	this->health = 0;
-	this->block = 0;
+	m_name = "";
+	m_strength = 0;
+	m_health = 0;
+	m_armour = 0;
 }
 
-Warrior::Warrior(std::string name, int strength, int health, float block)
+Warrior::Warrior(std::string name, int strength, int health, int armour)
 {
-	this->name = name;
-	this->strength = strength;
-	this->health = health;
-	this->block = block;
-}
-
-Warrior::~Warrior()
-{
+	m_name = name;
+	m_strength = strength;
+	m_health = health;
+	m_armour = armour;
 }
 
 
-void Attack(Warrior& warrior1, Warrior& warrior2) {
+//basic attack - reduced by warrior armour
+void Warrior::BasicAttack(Warrior& warrior) {
 
-	warrior2.SetHp(warrior2.GetHp() - warrior1.GetStr());
+	int damage = (rand() % m_strength) - warrior.GetArmour();
+	
+	if (damage <= 0) {
+		damage = 0;
+		std::cout << m_name << "s physical attack was too weak to get through " << 
+			warrior.GetName() << "'s armour at " << warrior.GetArmour() << std::endl;
+		return;
+	}
 
-	std::cout << warrior1.GetName() << " attacked " << warrior2.GetName() << "\n";
+	warrior.ReduceHp(damage);
 
-	PrintHp(warrior2);
+	std::cout << m_name << " attacked " << warrior.GetName() <<
+		" and dealt " << damage << " damage\n";
 }
 
+void Warrior::ReduceHp(int damage) {
 
-void Battle(Warrior& warrior1, Warrior& warrior2) {
-
-	Attack(warrior1, warrior2);
-
-
-	if (warrior2.GetHp() > 0)
-		Battle(warrior2, warrior1);
+	if (m_health - damage < 0)
+		m_health = 0;
 	else
-		std::cout << warrior2.GetName() << " died!\n";
+		m_health = m_health - damage;
+}
+
+void Warrior::PrintHp() {
+	std::cout << GetName() << " has " << GetHp() << " left\n";
+}
+
+// ------------------- Bruiser ---------------------
+Bruiser::Bruiser(std::string name, int strength, int health, int armour, float blockchance) : Warrior(name, strength, health, armour) {
+	m_name = name;
+	m_strength = strength;
+	m_health = health;
+	m_armour = armour;
+	m_blockChance = blockchance;
+}
+
+void Bruiser::Battle(Warrior& thisBruiser, Warrior& otherWarrior) {
+
+	Attack(otherWarrior);
+
+	if (otherWarrior.GetHp() > 0)
+		otherWarrior.Battle(otherWarrior, thisBruiser);
+	else
+		std::cout << otherWarrior.GetName() << " died!\n";
+}
+
+
+//currently bruisers only have a basic attack
+void Bruiser::Attack(Warrior& warrior) {
+	BasicAttack(warrior);
+}
+
+
+// ------------------- Mage ---------------------
+
+//spell attack ignors warrior armour
+Mage::Mage(std::string name, int strength, int health, int armour, int spellPower) : Warrior(name, strength, health, armour) {
+	m_name = name;
+	m_strength = strength;
+	m_health = health;
+	m_armour = armour;
+	m_spellPower = spellPower;
+}
+
+
+void Mage::Battle(Warrior& thisMage, Warrior& otherWarrior) {
+
+	Attack(otherWarrior);
+
+	if (otherWarrior.GetHp() > 0) {
+		otherWarrior.Battle(otherWarrior, thisMage);
+	}
+	else
+		std::cout << otherWarrior.GetName() << " died!\n";
+}
+
+//50/50 chance to call basic or spell attack
+void Mage::Attack(Warrior& warrior) {
+
+	if (rand() % 2)
+		BasicAttack(warrior);
+	else
+		SpellAttack(warrior);
 
 }
 
-void PrintHp(Warrior& warrior) {
+void Mage::SpellAttack(Warrior& warrior) {
 
-	std::cout << warrior.GetName() << " has " << warrior.GetHp() << "\n";
+	//min damage = 1
+	int damage = (rand() % (m_spellPower - 1)) + 1;
 
+	warrior.ReduceHp(damage);
+
+	std::cout << m_name << " attacked " << warrior.GetName() <<
+		" with a spell and dealt " << damage << " damage\n";
 }

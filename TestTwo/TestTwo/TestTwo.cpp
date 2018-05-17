@@ -6,22 +6,22 @@
 
 #include <iostream>
 #include <string>
+#include <ctime>
 
 //comment two
 
 int main()
 {
+	srand(time(NULL));
+
 	//name, str, hp, block
-	Warrior saman("Saman", 10, 100, 50);
-	Warrior ross("Ross", 4, 12, 200);
+	Bruiser saman("Saman", 25, 150, 3, 0.2);
+	Bruiser ross("Ross", 16, 300, 10, 0.3);
+	Mage adrian("Adrian", 8, 100, 0, 50);
 
-	std::cout << saman.GetName() << " has " << saman.GetHp() << "hp\n";
-	std::cout << ross.GetName() << " has " << ross.GetHp() << "hp\n";
+	saman.PrintHp();
 
-	Battle(saman, ross);
-
-	std::cout << saman.GetName() << " has " << saman.GetHp() << "hp\n";
-	std::cout << ross.GetName() << " has " << ross.GetHp() << "hp\n";
+	adrian.Battle(adrian, saman);
 
     return 0;
 }
